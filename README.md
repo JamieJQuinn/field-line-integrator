@@ -12,7 +12,9 @@ Currently the quantities available are:
 
 This tool is purely provided for interest/inspiration and is unlikely to be of direct use in other research. If you would like to improve it, please do submit a pull request!
 
-## Options
+## Usage
+
+Running `python twist_calc.py` will display a brief help. Descriptions of some options are below.
 
 `grid_width` sets the width of the square grid of seed points.
 
@@ -21,6 +23,14 @@ This tool is purely provided for interest/inspiration and is unlikely to be of d
 `integration_variable` sets which variable should be integrated
 
 `starting_z` sets the z-location of the initial plane of seed points.
+
+## Example
+
+The following example will integrate the parallel electric field along field lines derived from the field in `input.sdf` producing a grid of 700x700 outputs in `output.npy`:
+
+```
+python twist_calc.py --integration_variable parallel_electric_field --input input.sdf --output output.npy --grid_width 700
+```
 
 ## Limitations
 
