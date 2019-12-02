@@ -41,15 +41,15 @@ def calculate_field_lines(sdfFile, n_lines, direction, integration_variable, sta
     elif integration_variable == "parallel_electric_field":
         integrand = parallel_electric_field(bx, by, bz, dx, dy, dz)
     elif integration_variable == "connectivity":
-        integrand = False
+        integrand = None
     else:
-        integrand = False
+        integrand = None
         print(integration_variable, "not found! Purely calculating field lines.")
 
     # field = mlab.pipeline.vector_field(bx, by, bz)
     # magnitude = mlab.pipeline.extract_vector_norm(field)
 
-    if integrand:
+    if integrand is not None:
         flow = mlab.flow(bx, by, bz,
                          scalars=integrand,
                          seedtype='plane', 
@@ -65,7 +65,7 @@ def calculate_field_lines(sdfFile, n_lines, direction, integration_variable, sta
     nx = sdfFile.Magnetic_Field_bx_centred.dims[0]
     nz = sdfFile.Magnetic_Field_bz_centred.dims[2]
 
-    z_plane = starting_z * nz
+    z_plane = float(starting_z) * nz
 
     # print("Resizing grid to ", nx)
 
@@ -112,7 +112,7 @@ def extract_twist_and_initial_points(flow, map_point):
         else:
             grid_points.append(line_points[mask[0]])
 
-        integration_result = np.sum(averaged_integrand*ds)/line_length
+        integration_result = np.sum(averaged_integrand*ds)
 
         integrated_quantities.append(integration_result)
         current_line_index += n_points + 1
@@ -152,11 +152,18 @@ def line_connection(start, end, nx, ny):
 
     if (start_r <= boundary1 and (  end_r > boundary1)) or \
        (  end_r <= boundary1 and (start_r > boundary1)):
+        # field is connected to inner and outer
         return 1+2
 
     if ((start_r > boundary1 and start_r < boundary2) and (end_r > boundary2)) or \
        ((end_r > boundary1 and end_r < boundary2) and (start_r > boundary2)):
+        # field is connected to outer and straight
         return 2+4
+
+    if (start_r <= boundary1 and (  end_r > boundary2)) or \
+       (  end_r <= boundary1 and (start_r > boundary2)):
+        # field is connected to inner and straight
+        return 1+4
 
     return 0
 
@@ -239,7 +246,7 @@ def main():
     args = parser.parse_args()
 
     # Disable window popping up
-    mlab.options.offscreen = True
+    # mlab.options.offscreen = True
 
     print("Opening SDF file: " + args.input)
     sdfFile = sdf.read(args.input)
